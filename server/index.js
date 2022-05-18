@@ -32,10 +32,12 @@ server.listen(PORT, () =>
 io.on("connection", (socket) => {
     //use socket to listen to events 
     console.log('there is new connection');
+    
     //receive the sent message send to all other users
     socket.on('sentMessage', (data) => {
         //send to everyone but sender
-        socket.to(data.room).emit("receiveMessage", data);
+        console.log('message was sent');
+        socket.broadcast.to(data.room).emit('receiveMessage', data);
     });
 
     //join room

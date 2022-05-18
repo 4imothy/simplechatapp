@@ -1,40 +1,58 @@
-import './App.css';
-import io from 'socket.io-client';
 import { useEffect, useState } from 'react';
+import { socket } from './socket';
 
 //import components
 import RoomNumberInput from './components/RoomNumberInput';
 import JoinRoomButton from './components/JoinRoomButton';
 import MessageInput from './components/MessageInput';
 import SendMessageButton from './components/SendMessageButton';
-
-//uncomment to work 
-//const socket = io.connect("http://localhost:3001");
-const socket = io.connect("https://myreachchatapp.herokuapp.com/");
-
+import MessageContainer from './components/MessageContainer';
+import SenderInput from './components/SenderInput';
+import SenderButton from './components/SenderButton';
 
 function App() {
+  //keeps track of the amount of messages on screen
+  const [msgCount, setMsgCount] = useState(0);
+  //sender
+  const [sender, setSender] = useState("");
+  const [tempSender, setTempSender] = useState("");
   //room
   const [room, setRoom] = useState("");
+  //chat title display
+  const [title, setTitle] = useState("Live Chat Room:");
+  //messages make an array
+  const [messages] = useState([]);
+  //default
   //messages
   const [message, setMessage] = useState("");
-  const [messageReceived, setMessageReceived] = useState("");
 
   const sendMessage = () => {
-    socket.emit('sentMessage', { message, room });
+    //also add for the sender with 'you: '
+    socket.emit('sentMessage', { message, room, sender });
+    messages.push(`You: ${message}`);
+    setMsgCount(msgCount + 1);
+    console.log('smc: ' + msgCount);
   }
-  
+
   useEffect(() => {
-    socket.on('receiveMessage', (data) => {
-      setMessageReceived(data.message);
-    });
-  }, []);
+    const handler = (data) => { 
+      //msg count becomes 0 here
+      console.log('receive');
+      messages.push(`${data.sender}: ${data.message}`);
+      setMsgCount(msgCount + 1);
+      console.log('rmc: ' + msgCount);
+    }
+    socket.on('receiveMessage', handler);
+    return () => socket.off('receiveMessage', handler);
+  });
 
   const joinRoom = () => {
     if (room !== "") {
+      setTitle(`Live Chat Room: ${room}`);
       socket.emit("joinRoom", room);
     }
   };
+
 
   return (
     <div className="App">
@@ -44,14 +62,23 @@ function App() {
       />
       <JoinRoomButton onClick={joinRoom} />
       <br></br>
+      <SenderInput id='senderInput' onChange={(event) => {
+        setTempSender(event.target.value);
+      }} />
+      <SenderButton onClick={() => {
+        if (tempSender) {
+          console.log('set sender');
+          setSender(tempSender);
+        }
+      }} />
+      <br></br>
       <MessageInput
         onChange={(event) => {
           setMessage(event.target.value);
         }}
       />
       <SendMessageButton onClick={sendMessage} />
-      <h1>Message:</h1>
-      {messageReceived}
+      <MessageContainer text={title} messages={messages} />
     </div>
   );
 }
