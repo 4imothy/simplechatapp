@@ -5,7 +5,7 @@ const MessageContainer = ({ text, messages }) => {
         return (
             Object.entries(messages).map((key, index) => {
                 return (
-                    <p key={`msg_${index}`}>
+                    <p style={MessagesStyle} key={`msg_${index}`}>
                         {key[1]}
                     </p>
                 )
@@ -14,7 +14,7 @@ const MessageContainer = ({ text, messages }) => {
     };
     return (
         <div style={MessageContainerStyle} >
-            <p>{text}</p>
+            <h3>{text}</h3>
             {renderMessages()}
         </div >
     )
@@ -22,6 +22,11 @@ const MessageContainer = ({ text, messages }) => {
 
 const MessageContainerStyle = {
     //ex: backgroundColor: 'red',
+    textAlign: 'center',
+}
+
+const MessagesStyle = {
+    font: 'bold 17px Arial'
 }
 
 export default MessageContainer
