@@ -37,12 +37,13 @@ io.on("connection", (socket) => {
     socket.on('sentMessage', (data) => {
         //send to everyone but sender
         console.log('message was sent');
-        socket.broadcast.to(data.room).emit('receiveMessage', data);
+        socket.to(data.room).emit('receiveMessage', data);
     });
 
     //join room
     socket.on('joinRoom', (data) => {
-        socket.join(data);
+        socket.join(data.room);
+        socket.nsp.to(data.room).emit('joinMessage', data.sender);
     });
 
     //user left

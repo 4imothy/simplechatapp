@@ -1,5 +1,5 @@
 //message container
-const MessageContainer = ({ text, messages }) => {
+const MessageContainer = ({ messages }) => {
 
     const renderMessages = () => {
         return (
@@ -14,7 +14,6 @@ const MessageContainer = ({ text, messages }) => {
     };
     return (
         <div style={MessageContainerStyle} >
-            <h3>{text}</h3>
             {renderMessages()}
         </div >
     )
