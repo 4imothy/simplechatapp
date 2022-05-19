@@ -30,7 +30,8 @@ server.listen(PORT, () =>
 
 //listen to events 
 io.on("connection", (socket) => {
-    //use socket to listen to events 
+    
+    //use socket to listen to events
     console.log('there is new connection');
     
     //receive the sent message send to all other users
