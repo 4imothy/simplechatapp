@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { socket } from './socket';
 import './App.css';
 
@@ -29,35 +29,39 @@ function App() {
   const [inputDataType, setInputDataType] = useState("username");
   const [inputData, setInputData] = useState("");
 
+  /*
+    Below is for handling key presses
+    */
   //key down or onmousedown
   const downFunctions = {
-    username: function(){
+    username: function () {
       setSender(inputData);
       setInputDataType("room");
       setInputPlaceholder("Enter Room");
     },
-    room: function(){
+    room: function () {
       setRoom(inputData);
       setInputDataType("message");
       setInputPlaceholder("Enter Message");
     },
-    message: function(){
+    message: function () {
       setMsgCount(msgCount + 1);
       setInputDataType("sendthedata");
     }
   }
+
   //key up or on mouse up
   const upFunctions = {
-    room: function() {
+    room: function () {
       setDispUserText(`Username: ${inputData}`);
       setInputData("");
     },
-    message: function(){
+    message: function () {
       setChatTitleText(`Live Chat Room: ${room}`);
-      socket.emit("joinRoom", {room, sender});
+      socket.emit("joinRoom", { room, sender });
       setInputData("");
     },
-    sendthedata:function(){
+    sendthedata: function () {
       console.log('m: ' + inputData);
       socket.emit('sentMessage', { inputData, room, sender });
       messages.unshift(`You: ${inputData}`);
@@ -106,9 +110,26 @@ function App() {
     }
   }
 
-  const useValues = (event) => {
+  const releaseConfInput = () => {
+    //use the values
+    //then username was just put in
+    if (inputDataType === "room") {
+      upFunctions.room();
+    }
+    //user room was just entered
+    if (inputDataType === "message") {
+      upFunctions.message();
+    }
+    //then room was just put in
+    if (inputDataType === "sendthedata") {
+      upFunctions.sendthedata();
+    }
+  }
+
+  const handleKeyUp = (event) => {
     if (event.repeat)
       return;
+    //if enter key is the one released
     if (event.keyCode === 13) {
       //send signals here
       //then room was just put in
@@ -128,51 +149,35 @@ function App() {
     }
   }
 
-  const releaseConfInput = () => {
-    //use the values
-    //then username was just put in
-    if (inputDataType === "room") {       
-       upFunctions.room();
-    }
-    //user room was just entered
-    if (inputDataType === "message") {
-      upFunctions.message();
-    }
-    //then room was just put in
-    if (inputDataType === "sendthedata") {
-      upFunctions.sendthedata();
-    }
-  }
-
   //to handle key down
   useEffect(() => {
     //to handle key down
     document.addEventListener('keydown', handleKeyDown);
     //use the values set by the handler above
-    document.addEventListener('keyup', useValues);
+    document.addEventListener('keyup', handleKeyUp);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', useValues);
+      document.removeEventListener('keyup', handleKeyUp);
     }
   });
 
   useEffect(() => {
     const receiveHandler = (data) => {
       //msg count becomes 0 here
-      console.log('receive');
-      messages.unshift(`${data.sender}: ${data.inputData}`);
+      console.log('receive message');
+      messages.unshift(<div style={data.style}>{`${data.sender}: ${data.msgText}`}</div>);
       setMsgCount(msgCount + 1);
     }
     const joinHandler = (data) => {
-      messages.unshift(`${data} Has Joined`);
+      messages.unshift(<div style={data.style}>{`${data.sender} Has Joined`}</div>);
       setMsgCount(msgCount + 1);
     }
     socket.on('receiveMessage', receiveHandler);
     socket.on('joinMessage', joinHandler);
     // so it only receives each message once
     return () => {
-    socket.off('receiveMessage', receiveHandler);
-    socket.off('joinMessage', joinHandler);
+      socket.off('receiveMessage', receiveHandler);
+      socket.off('joinMessage', joinHandler);
     }
   });
 

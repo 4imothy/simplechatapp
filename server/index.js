@@ -36,15 +36,28 @@ io.on("connection", (socket) => {
     
     //receive the sent message send to all other users
     socket.on('sentMessage', (data) => {
-        //send to everyone but sender
         console.log('message was sent');
-        socket.to(data.room).emit('receiveMessage', data);
+        const sendData = { 
+            sender: data.sender,
+            msgText: data.inputData,
+            style: {
+            color: '#0D9851'
+            }
+        }
+        //send to everyone but sender
+        socket.to(data.room).emit('receiveMessage', sendData);
     });
 
     //join room
     socket.on('joinRoom', (data) => {
         socket.join(data.room);
-        socket.nsp.to(data.room).emit('joinMessage', data.sender);
+        const sendData = {
+            sender: data.sender,
+            style: {
+                color: 'darkblue'
+            }
+        }
+        socket.nsp.to(data.room).emit('joinMessage', sendData);
     });
 
     //user left

@@ -5,9 +5,9 @@ const MessageContainer = ({ messages }) => {
         return (
             Object.entries(messages).map((key, index) => {
                 return (
-                    <p style={MessagesStyle} key={`msg_${index}`}>
+                    <div style={MessagesStyle} key={`msg_${index}`}>
                         {key[1]}
-                    </p>
+                    </div>
                 )
             })
         )
