@@ -8,6 +8,7 @@ import ConfirmInputButton from './components/ConfirmInputButton';
 import ChatTitle from './components/ChatTitle';
 import UsernameDisplay from './components/UsernameDisplay';
 import MessageContainer from './components/MessageContainer';
+import LeaveRoomButton from './components/LeaveRoomButton';
 
 function App() {
   //keeps track of the amount of messages on screen
@@ -16,6 +17,7 @@ function App() {
   const [sender, setSender] = useState("");
   //room
   const [room, setRoom] = useState("");
+  const [inRoom, setInRoom] = useState(false);
   //chat title display
   const [chatTitleText, setChatTitleText] = useState("Live Chat Room:");
   //display username
@@ -60,11 +62,12 @@ function App() {
       setChatTitleText(`Live Chat Room: ${room}`);
       socket.emit("joinRoom", { room, sender });
       setInputData("");
+      setInRoom(true);
     },
     sendthedata: function () {
       console.log('m: ' + inputData);
       socket.emit('sentMessage', { inputData, room, sender });
-      messages.unshift(`You: ${inputData}`);
+      messages.unshift(<div className="userMessage">You: ${inputData}</div>);
       setMsgCount(msgCount + 1);
       setInputData("");
     }
@@ -113,7 +116,7 @@ function App() {
   const releaseConfInput = () => {
     //use the values
     //then username was just put in
-    if (inputDataType === "room") {
+    if (inputDataType === "room" && inputData !== "") {
       upFunctions.room();
     }
     //user room was just entered
@@ -126,6 +129,19 @@ function App() {
     }
   }
 
+  const leaveRoomClick = () =>{
+    if(inRoom){
+      console.log('leaving');
+      socket.emit('leaveRoom', {room, sender});
+      setInRoom(false);
+      messages.length = 0;
+      messages.unshift(<div className="userMessage">You Left Room: {room}</div>);
+      setInputDataType('room');
+      setInputPlaceholder("Enter Room");
+      setChatTitleText("Live Chat Room:");
+    }
+  }
+
   const handleKeyUp = (event) => {
     if (event.repeat)
       return;
@@ -134,7 +150,7 @@ function App() {
       //send signals here
       //then room was just put in
       //user name was just entered
-      if (inputDataType === "room") {
+      if (inputDataType === "room" && inputData !== "") {
         upFunctions.room();
       }
       //the room was just entered
@@ -172,12 +188,18 @@ function App() {
       messages.unshift(<div style={data.style}>{`${data.sender} Has Joined`}</div>);
       setMsgCount(msgCount + 1);
     }
+    const leaveRoomHandler = (data) =>{
+      messages.unshift(<div style={data.style}>{`${data.sender} Left The Room`}</div>);
+      setMsgCount(msgCount + 1);
+    }
     socket.on('receiveMessage', receiveHandler);
     socket.on('joinMessage', joinHandler);
+    socket.on('leaveRoomMessage', leaveRoomHandler);
     // so it only receives each message once
     return () => {
       socket.off('receiveMessage', receiveHandler);
       socket.off('joinMessage', joinHandler);
+      socket.off('leaveRoomMessage', leaveRoomHandler);
     }
   });
 
@@ -188,6 +210,7 @@ function App() {
       }}
       />
       <ConfirmInputButton onMouseDown={confInputClick} onMouseUp={releaseConfInput}></ConfirmInputButton>
+      <LeaveRoomButton onMouseDown={leaveRoomClick}/>
       <UsernameDisplay text={dispUserText} />
       <ChatTitle text={chatTitleText} />
       <MessageContainer text={chatTitleText} messages={messages} />

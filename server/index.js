@@ -30,18 +30,18 @@ server.listen(PORT, () =>
 
 //listen to events 
 io.on("connection", (socket) => {
-    
+
     //use socket to listen to events
     console.log('there is new connection');
-    
+
     //receive the sent message send to all other users
     socket.on('sentMessage', (data) => {
         console.log('message was sent');
-        const sendData = { 
+        const sendData = {
             sender: data.sender,
             msgText: data.inputData,
             style: {
-            color: '#0D9851'
+                color: '#0D9851'
             }
         }
         //send to everyone but sender
@@ -60,11 +60,24 @@ io.on("connection", (socket) => {
         socket.nsp.to(data.room).emit('joinMessage', sendData);
     });
 
+    //let user leave a room
+    socket.on('leaveRoom', (data) => {
+        
+        const sendData = {
+            sender: data.sender,
+            style: {
+                color: 'darkblue'
+            }
+        }
+        
+        socket.to(data.room).emit('leaveRoomMessage', sendData);
+        socket.leave(data.room);
+    });
+
     //user left
     socket.on('disconnect', () => {
         console.log('user has left');
     });
-
 });
 
 app.use(router);
