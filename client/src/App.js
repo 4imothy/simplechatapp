@@ -67,7 +67,7 @@ function App() {
     sendthedata: function () {
       console.log('m: ' + inputData);
       socket.emit('sentMessage', { inputData, room, sender });
-      messages.unshift(<div className="userMessage">You: ${inputData}</div>);
+      messages.unshift(<div className="userMessage">You: {inputData}</div>);
       setMsgCount(msgCount + 1);
       setInputData("");
     }
