@@ -15,6 +15,7 @@ const server = http.createServer(app);
 //instance of socket io
 //var used to do things with socket.io
 //const io = socketio(server);
+let userNames = [];
 
 const io = new Server(server, {
     //to connect to socket.io
@@ -23,20 +24,18 @@ const io = new Server(server, {
     }
 });
 
-
 server.listen(PORT, () =>
     console.log(`connected, port: ${PORT}`)
 );
 
 //listen to events 
-io.on("connection", (socket) => {
+io.on("connection", socket => {
 
     //use socket to listen to events
     console.log('there is new connection');
 
     //receive the sent message send to all other users
     socket.on('sentMessage', (data) => {
-        console.log('message was sent');
         const sendData = {
             sender: data.sender,
             msgText: data.inputData,
@@ -51,6 +50,8 @@ io.on("connection", (socket) => {
     //join room
     socket.on('joinRoom', (data) => {
         socket.join(data.room);
+        userNames[socket.id] = data.sender;
+        console.log('length: '  + userNames.length);
         const sendData = {
             sender: data.sender,
             style: {
@@ -62,69 +63,44 @@ io.on("connection", (socket) => {
 
     //let user leave a room
     socket.on('leaveRoom', (data) => {
-        
+
         const sendData = {
             sender: data.sender,
             style: {
                 color: 'darkblue'
             }
         }
-        
         socket.to(data.room).emit('leaveRoomMessage', sendData);
         socket.leave(data.room);
+        console.log('user left room');
     });
 
     //user left
-    socket.on('disconnect', () => {
-        console.log('user has left');
+    socket.on("disconnecting", () => {
+        //if it is in a room
+        console.log(`user left: ${socket.id}`);
+        var rooms = socket.rooms;
+        var roomToLeave;
+        //the second element is the room first is the id
+        count = 0;
+        for (let room of rooms) {
+            if (count === 1)
+                roomToLeave = room;
+            count++;
+        }
+        const sendData = {
+            sender: userNames[socket.id],
+            style: {
+                color: 'darkblue'
+            }
+        }
+        socket.to(roomToLeave).emit('leaveRoomMessage', sendData);
+    });
+
+    socket.on("disconnect", () => {
+        delete userNames[socket.id];
     });
 });
 
 app.use(router);
 app.use(cors());
-
-/*
-//create express server
-const express = require('express');
-//instance of the express library
-const app = express();
-//create instance of http library
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
-
-//apply middleware
-app.use(cors());
-
-const server = http.createServer(app);
-
-//var used to do things with socket.io
-const io = new Server(server, {
-    //to connect to socket.io
-    cors: {
-        origin: "http://localhost:3000",
-        methods: ["Get", "Post"],
-    }
-});
-
-//listen to 3001 port cause server on 3000
-server.listen(3001, () => {
-    console.log('server is running')
-});
-
-//listen to events 
-io.on("connection", (socket) => {
-    //use socket to listen to events 
-
-    //receive the sent message send to all other users
-    socket.on('sentMessage',(data) =>{
-        //send to everyone but sender
-        socket.to(data.room).emit("receiveMessage", data);
-    });
-
-    //join room
-    socket.on('joinRoom', (data) =>{
-        socket.join(data);
-    });
-});
-*/
