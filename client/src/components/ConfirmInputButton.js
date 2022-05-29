@@ -9,6 +9,7 @@ const ConfirmInputButtonStyle ={
     //ex: backgroundColor: 'red',
     marginTop: '-20px',
     height: '4vh',
+    fontSize: '2vh'
 }
 
 export default ConfirmInputButton
