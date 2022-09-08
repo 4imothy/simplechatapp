@@ -7,8 +7,8 @@ const InputData = ({ placeholder, value, onChange }) => {
 
 const InputDataStyle = {
     //ex: backgroundColor: 'red',
-    height: '2.5vh',
-    fontSize: '2vh'
+    height: '20px',
+    fontSize: '20px'
 }
 
 export default InputData

@@ -8,8 +8,8 @@ const ConfirmInputButton = ({ onMouseDown, onMouseUp }) => {
 const ConfirmInputButtonStyle ={
     //ex: backgroundColor: 'red',
     marginTop: '-20px',
-    height: '4vh',
-    fontSize: '2vh'
+    height: '30px',
+    fontSize: '20px'
 }
 
 export default ConfirmInputButton

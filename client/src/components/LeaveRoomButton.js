@@ -7,8 +7,8 @@ const LeaveRoomButton = ({ onMouseUp, onMouseDown }) => {
 
 const LeaveRoomButtonStyle = {
     marginLeft: '2%',
-    height: '4vh',
-    fontSize: '2vh'
+    height: '30px',
+    fontSize: '20px'
 }
 
 export default LeaveRoomButton
